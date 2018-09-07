@@ -1,0 +1,2 @@
+batch_size:500 epoch:100 time:594.7247004508972[sec]
+batch_size:1000 epoch:1000 time:116.17537689208984[sec]
