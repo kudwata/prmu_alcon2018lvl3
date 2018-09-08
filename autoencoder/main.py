@@ -6,7 +6,7 @@ from keras.models import load_model
 from sklearn.cluster import KMeans
 
 
-model_num = 1
+model_num = 2
 labels = []
 for i in range(8):
     labels.append(np.load('model{0}/model{0}_{1}.npy'.format(model_num, i)))

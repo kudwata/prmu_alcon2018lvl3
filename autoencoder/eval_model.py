@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 def getScore(N_SAMPLING=32):
     n_sampling = N_SAMPLING
-    model_num = 1
+    model_num = 2
 
     target = []
     for i in range(8):
