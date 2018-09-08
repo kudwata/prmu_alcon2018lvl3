@@ -9,9 +9,9 @@ if __name__ == '__main__':
     X_test = x_test.astype('float32')
     X_test /= 255.0
 
-    model = load_model('cnn_model1.h5')
+    model = load_model('lccnn_model1.h5')
 
     labels = model.predict(X_test)
 
     for i in range(8):
-        np.save('output/model1_{}.npy'.format(i), labels[i])
+        np.save('output/model3_{}.npy'.format(i), labels[i])

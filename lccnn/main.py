@@ -106,4 +106,4 @@ if __name__ == '__main__':
     with open('time_log.txt', mode='a') as f:
         f.write(s)
 
-    multiModel.save('cnn_model1.h5')
+    multiModel.save('lccnn_model1.h5')

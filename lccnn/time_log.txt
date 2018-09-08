@@ -1,0 +1,1 @@
+batch_size:1000 epoch:1000 time:361.40528750419617[sec]
