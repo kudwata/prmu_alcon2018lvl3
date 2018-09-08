@@ -44,10 +44,8 @@ if __name__ == '__main__':
     cifarInput = Input(shape = (X_train.shape[1:]))
     
     x = LocallyConnected2D(32, (3, 3), padding='valid', activation='relu')(cifarInput)
-    x = LocallyConnected2D(32, (3, 3), padding='valid', activation='relu')(x)
     x = MaxPooling2D()(x)
     x = Dropout(0.25)(x)
-    x = LocallyConnected2D(64, (3, 3), padding='valid', activation='relu')(x)
     x = LocallyConnected2D(64, (3, 3), padding='valid', activation='relu')(x)
     x = MaxPooling2D()(x)
     x = Dropout(0.25)(x)
