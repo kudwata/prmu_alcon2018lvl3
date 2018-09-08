@@ -14,4 +14,4 @@ if __name__ == '__main__':
     labels = model.predict(X_test)
 
     for i in range(8):
-        np.save('model1_{}.npy'.format(i), labels[i])
+        np.save('output/model1_{}.npy'.format(i), labels[i])
