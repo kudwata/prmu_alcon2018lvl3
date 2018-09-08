@@ -5,9 +5,11 @@ from keras.models import load_model
 
 from sklearn.cluster import KMeans
 
+
+model_num = 1
 labels = []
 for i in range(8):
-    labels.append(np.load('model1/model1_{}.npy'.format(i)))
+    labels.append(np.load('model{0}/model{0}_{1}.npy'.format(model_num, i)))
 
 def clusterring(images, N_CLUSTERS=64):
     cluster = KMeans(n_clusters=N_CLUSTERS)
@@ -59,7 +61,7 @@ def clone(N_CLUSTERS=32):
         expected[i] = predicted[clusters[i]]
 
     print(expected[0:10])
-    np.save('output/output{}.npy'.format(n_clusters), expected)
+    np.save('output/model{0}/output{1}.npy'.format(model_num, n_clusters), expected)
 
 if __name__ == '__main__':
     clone(10000)
