@@ -64,4 +64,6 @@ def clone(N_CLUSTERS=32):
     np.save('output/model{0}/output{1}.npy'.format(model_num, n_clusters), expected)
 
 if __name__ == '__main__':
-    clone(10000)
+    samplings = np.array((16,32,64,128,256,512,1024,2048,3072,4096,6144,8192,10000))
+    for i in samplings:
+        clone(i)
