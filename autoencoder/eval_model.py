@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 def getScore(N_SAMPLING=32):
     n_sampling = N_SAMPLING
     model_num = 1
-    target_pass = 'target_svm/'
+    target_pass = 'target/'
     output_pass = 'output_svm/'
 
     target = []
