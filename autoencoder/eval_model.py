@@ -45,6 +45,7 @@ def getScore(N_SAMPLING=32):
 
 if __name__ == '__main__':
     samplings = np.array((16,32,64,128,256,512,1024,2048,3072,4096,6144,8192,10000))
+    #samplings = np.array((16,32))
     score = np.zeros(samplings.shape[0])
     acc = np.zeros(samplings.shape[0])
     for i in range(samplings.shape[0]):

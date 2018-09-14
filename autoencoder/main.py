@@ -9,7 +9,7 @@ from sklearn import svm
 model_num = 1
 labels = []
 for i in range(8):
-    labels.append(np.load('model{0}/model{0}_{1}.npy'.format(model_num, i)))
+    labels.append(np.load('target/model{0}/model{0}_{1}.npy'.format(model_num, i)))
 
 def clusterring(images, N_CLUSTERS=64):
     cluster = KMeans(n_clusters=N_CLUSTERS)
@@ -58,7 +58,7 @@ def clone(N_CLUSTERS=32):
     expected = np.zeros((10000,8))
 
     for i in range(8):
-        clf = svm.SVC()
+        clf = svm.SVC(class_weight='balanced')
         in_arr = predicted[i]
         clf.fit(p_features, in_arr)
         
@@ -67,9 +67,10 @@ def clone(N_CLUSTERS=32):
         for j in range(10000):
             expected[j][i] = temp[j]
 
-    np.save('target_svm/model{0}/output{1}.npy'.format(model_num, n_clusters), expected)
+    np.save('output_svm/model{0}/output{1}.npy'.format(model_num, n_clusters), expected)
 
 if __name__ == '__main__':
     samplings = np.array((16,32,64,128,256,512,1024,2048,3072,4096,6144,8192,10000))
+    #samplings = np.array((16, 32))
     for i in samplings:
         clone(i)
