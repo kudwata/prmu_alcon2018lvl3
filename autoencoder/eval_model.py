@@ -3,13 +3,15 @@ import matplotlib.pyplot as plt
 
 def getScore(N_SAMPLING=32):
     n_sampling = N_SAMPLING
-    model_num = 0
+    model_num = 1
+    target_pass = 'target_svm/'
+    output_pass = 'output_svm/'
 
     target = []
     for i in range(8):
-        target.append(np.load('model{0}/model{0}_{1}.npy'.format(model_num, i)))
+        target.append(np.load(target_pass + 'model{0}/model{0}_{1}.npy'.format(model_num, i)))
 
-    predicted = np.load('output/model{0}/output{1}.npy'.format(model_num, n_sampling))
+    predicted = np.load(output_pass + 'model{0}/output{1}.npy'.format(model_num, n_sampling))
 
     sum = 0.0
     acc = 0.0
