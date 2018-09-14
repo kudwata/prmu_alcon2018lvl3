@@ -26,7 +26,7 @@ def getLabel(number):
     return ans
 
 def clone(N_CLUSTERS=32):
-    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    (_, _), (x_test, ) = cifar10.load_data()
     
     X_test = x_test.astype('float32')
     X_test /= 255.0
