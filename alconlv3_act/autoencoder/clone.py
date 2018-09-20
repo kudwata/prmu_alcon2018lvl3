@@ -7,6 +7,7 @@ import skimage
 from PIL import Image
 from skimage.feature import local_binary_pattern
 from sklearn import neighbors
+from keras.models import load_model
 from labels import LabelTable
 from evaluation import LV3_Evaluator
 
@@ -35,12 +36,19 @@ LT = LabelTable(LABEL_LIST)
 # 画像特徴抽出器に相当するクラス
 # このサンプルコードでは Local Binary Patterns を抽出することにする（skimageを使用）
 class LV3_FeatureExtractor:
+    def __init__(self, model_dir='ae_encoder.h5'):
+        self.encoder = load_model(model_dir)
 
     # 画像 img から抽出量を抽出する
     def extract(self, img):
-        lbp = local_binary_pattern(img, 8, 1, method="uniform")
-        f, bins = np.histogram(lbp, bins=256, range=(0, 255), density=True)
-        return np.asarray(f, dtype=np.float32)
+        encoded_img = self.encoder.predict(img)
+        return encoded_img
+
+    def extract_proba(self, imgs):
+        encoded_imgs = []
+        for i in range(len(encoded_imgs)):
+            encoded_imgs.append(self.extract(imgs[i]))
+        return np.array(encoded_imgs)
 
 
 # ターゲット認識器への入力対象となる画像データセットを表すクラス
