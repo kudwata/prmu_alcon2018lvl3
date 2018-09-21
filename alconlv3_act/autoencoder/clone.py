@@ -8,6 +8,7 @@ from PIL import Image
 from skimage.feature import local_binary_pattern
 from sklearn import neighbors
 from keras.models import load_model
+from sklearn.cluster import KMeans
 from labels import LabelTable
 from evaluation import LV3_Evaluator
 
@@ -32,6 +33,8 @@ VALID_IMAGE_DIR = DATASET_PATH + "valid/"
 # グローバル変数として定義
 LT = LabelTable(LABEL_LIST)
 
+#最初に読み込む画像数
+IMG_NUM = 20000
 
 # 画像特徴抽出器に相当するクラス
 # このサンプルコードでは Local Binary Patterns を抽出することにする（skimageを使用）
@@ -41,8 +44,10 @@ class LV3_FeatureExtractor:
 
     # 画像 img から抽出量を抽出する
     def extract(self, img):
-        encoded_img = self.encoder.predict(img)
-        return encoded_img
+        data = img.astype('float32')
+        data /= 255.0
+        encoded_img = self.encoder.predict(np.array([data]))
+        return encoded_img.reshape(-1,)
 
     def extract_proba(self, imgs):
         encoded_imgs = []
@@ -80,7 +85,7 @@ class LV3_ImageSet:
     # n番目の画像の特徴量を取得
     #   extractor: LV3_FeatureExtractorクラスのインスタンス
     def get_feature(self, n, extractor):
-        img = self.get_image(n, as_gray=True)
+        img = self.get_image(n)
         return extractor.extract(img)
 
     # 以下自作
@@ -92,6 +97,12 @@ class LV3_ImageSet:
         for i in n_samples:
             imgs.append(self.get_image(i))
         return np.array(imgs)
+
+    def get_feature_list(self, n_samples, extractor):
+        features = []
+        for i in n_samples:
+            features.append(self.get_feature(i, extractor))
+        return np.array(features)
 
 
 # ターゲット認識器を表現するクラス
@@ -180,28 +191,35 @@ class LV3_UserDefinedClassifier:
         likelihoods = likelihoods[:, 1:]
         return np.float32(likelihoods)
 
+def clusterring(images, N_CLUSTERS=64):
+    cluster = KMeans(n_clusters=N_CLUSTERS)
+    predict = cluster.fit_predict(images)
+    center = cluster.cluster_centers_
+
+    return predict, center
 
 # ターゲット認識器に入力する画像特徴量をサンプリングする関数
 #   set: LV3_ImageSetクラスのインスタンス
 #   extractor: LV3_FeatureExtractorクラスのインスタンス
 #   n_samples: サンプリングする特徴量の数
-def LV3_user_function_sampling(set, extractor, n_samples=1):
+def LV3_user_function_sampling(set, extractor, n_samples=64):
 
-    # まず，画像データセット中の全画像から特徴量を抽出する
-    # 本サンプルコードでは処理時間短縮のため先頭5,000枚のみを対象とする
-    # 不要なら行わなくても良い
-    all_features = []
-    for i in range(0, 5000):
-        f = set.get_feature(i, extractor)
-        all_features.append((i, f)) # 画像番号と特徴量の組を保存
+    feature = set.get_feature_list(range(IMG_NUM), extractor)
+    clusters, center = clusterring(feature, N_CLUSTERS=n_samples)
 
-    # 特徴量の集合からn_samples個をランダムに抽出する
-    perm = np.random.permutation(n_samples)
-    features = []
-    for i in range(0, n_samples):
-        features.append(all_features[perm[i]])
+    near_num = np.zeros(n_samples, dtype=int)
+    near_far = np.full(n_samples, 100)
+    for j in range(IMG_NUM):
+        far = np.linalg.norm(feature[j] - center[clusters[j]])
+        if near_far[clusters[j]] > far:
+            near_far[clusters[j]] = far
+            near_num[clusters[j]] = j
+    
+    predicted = []
+    for i in range(n_samples):
+        predicted.append((near_num[i], feature[near_num[i]]))
 
-    return features
+    return predicted
 
 
 # クローン処理の実行
