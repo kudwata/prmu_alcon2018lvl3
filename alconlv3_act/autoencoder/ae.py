@@ -20,9 +20,9 @@ TRAIN_IMAGE_NUM = 418522
 # 評価用画像の総数
 VALID_IMAGE_NUM = 104630
 #学習に使う画像の数
-N_TRAIN = 10000
+N_TRAIN = 100000
 #テストに使う画像の数
-N_TEST = 1000
+N_TEST = 10000
 
 if __name__ == '__main__':
     train_set = clone.LV3_ImageSet(TRAIN_IMAGE_DIR)
