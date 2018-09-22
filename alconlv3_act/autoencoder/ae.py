@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import keras
 from keras.models import Model
 from keras.layers import Activation, Flatten, Input
-from keras.layers import Conv2D, MaxPooling2D, UpSampling2D
+from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Conv2DTranspose
 from keras.layers import BatchNormalization, Activation
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 import time
@@ -48,38 +48,50 @@ if __name__ == '__main__':
     cifarInput = Input(shape = (X_train.shape[1:]))
     
     x = Conv2D(32, (3, 3), padding='same')(cifarInput)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
     x = Conv2D(32, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D()(x)
     x = Conv2D(16, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
     x = Conv2D(16, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D()(x)
     x = Conv2D(4, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
     x = Conv2D(4, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     feature = MaxPooling2D()(x)
 
-    x = Conv2D(4, (3, 3), padding='same')(feature)
-    x = Conv2D(4, (3, 3), padding='same')(x)
+    x = Conv2DTranspose(4, (3, 3), padding='same')(feature)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Conv2DTranspose(4, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = UpSampling2D()(x)
-    x = Conv2D(16, (3, 3), padding='same')(x)
-    x = Conv2D(16, (3, 3), padding='same')(x)
+    x = Conv2DTranspose(16, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Conv2DTranspose(16, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = UpSampling2D()(x)
-    x = Conv2D(32, (3, 3), padding='same')(x)
-    x = Conv2D(32, (3, 3), padding='same')(x)
+    x = Conv2DTranspose(32, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    x = Conv2DTranspose(32, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = UpSampling2D()(x)
 
-    decoded = Conv2D(3, (3, 3), padding='same', activation='sigmoid')(x)
+    decoded = Conv2DTranspose(3, (3, 3), padding='same', activation='sigmoid')(x)
 
     autoencoder = Model(cifarInput, decoded)
 
