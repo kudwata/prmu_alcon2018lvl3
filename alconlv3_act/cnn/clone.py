@@ -21,7 +21,7 @@ LABEL_LIST = "../lv3_label_list.csv"
 
 # データセットが存在するディレクトリのパス
 # ダウンロード・解凍先に応じて適宜変更してください
-DATASET_PATH = "../lv3_dataset/"
+DATASET_PATH = "../lv3_dataset_small/"
 
 # クローン認識器訓練用画像が存在するディレクトリのパス
 TRAIN_IMAGE_DIR = DATASET_PATH + "train/"
@@ -39,15 +39,12 @@ IMG_NUM = 20000
 # 画像特徴抽出器に相当するクラス
 # このサンプルコードでは Local Binary Patterns を抽出することにする（skimageを使用）
 class LV3_FeatureExtractor:
-    def __init__(self, model_dir='ae_encoder.h5'):
-        self.encoder = load_model(model_dir)
 
     # 画像 img から抽出量を抽出する
     def extract(self, img):
-        data = img.astype('float32')
-        data /= 255.0
-        encoded_img = self.encoder.predict(np.array([data]))
-        return encoded_img.reshape(-1,)
+        lbp = local_binary_pattern(img, 8, 1, method="uniform")
+        f, bins = np.histogram(lbp, bins=256, range=(0, 255), density=True)
+        return np.asarray(f, dtype=np.float32)
 
     def extract_proba(self, imgs):
         encoded_imgs = []
@@ -79,13 +76,12 @@ class LV3_ImageSet:
             img = Image.open(self.imgfiles[n]).convert("L")
         else:
             img = Image.open(self.imgfiles[n]).convert("RGB")
-        img = img.resize((128, 128), Image.BILINEAR) # 処理時間短縮のため画像サイズを128x128に縮小
         return np.asarray(img, dtype=np.uint8)
 
     # n番目の画像の特徴量を取得
     #   extractor: LV3_FeatureExtractorクラスのインスタンス
     def get_feature(self, n, extractor):
-        img = self.get_image(n)
+        img = self.get_image(n, as_gray=True)
         return extractor.extract(img)
 
     # 以下自作
@@ -101,8 +97,8 @@ class LV3_ImageSet:
     def get_feature_list(self, n_samples, extractor):
         features = []
         for i in n_samples:
-            features.append(self.get_feature(i, extractor))
-        return np.array(features)
+            features.append((i, self.get_feature(i, extractor)))
+        return features
 
 
 # ターゲット認識器を表現するクラス
@@ -247,7 +243,7 @@ if __name__ == '__main__':
 
     # ターゲット認識器への入力として用いる特徴量を用意
     # このサンプルコードではひとまず2,000サンプルを用意することにする
-    n = 2000
+    n = 5000
     features = LV3_user_function_sampling(train_set,  extractor, n_samples=n)
     print("\n{0} features were sampled.".format(n))
 

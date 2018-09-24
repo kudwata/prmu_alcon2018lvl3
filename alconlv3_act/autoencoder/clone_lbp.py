@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
     # ターゲット認識器への入力として用いる特徴量を用意
     # このサンプルコードではひとまず2,000サンプルを用意することにする
-    n = 5000
+    n = 2000
     features = LV3_user_function_sampling(train_set,  extractor, n_samples=n)
     print("\n{0} features were sampled.".format(n))
 
