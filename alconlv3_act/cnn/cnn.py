@@ -87,7 +87,8 @@ if __name__ == "__main__":
 
     output = []
     for i in range(LT.N_LABELS()):
-        output_layer = Dense(2, activation='softmax', name=LT.ID2LNAME(i))(feature)
+        output_layer = Dense(64, activation='relu')(feature)
+        output_layer = Dense(2, activation='softmax', name=LT.ID2LNAME(i))(output_layer)
         output.append(output_layer)
 
     model = Model(input_layer, output)
@@ -95,14 +96,14 @@ if __name__ == "__main__":
     opt = keras.optimizers.adam()
     model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=['accuracy'])
     
-    es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=5, mode='auto')
+    #es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=5, mode='auto')
     tb_cb = TensorBoard(log_dir='logs', histogram_freq=0)
     mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True)
 
-    callback = [es_cb, tb_cb, mc_cb]
+    callback = [tb_cb, mc_cb]
 
-    batch_size = 10
-    epochs = 100
+    batch_size = 50
+    epochs = 200
     
     start_Time = time.time()
 
