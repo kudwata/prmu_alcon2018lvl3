@@ -1,2 +1,4 @@
 __pycache__/
 lv3_*
+alconlv3_act/cnn/*.h5
+alconlv3_act/cnn/*.hdf5
