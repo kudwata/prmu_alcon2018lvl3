@@ -5,11 +5,13 @@ from keras.models import Model
 from keras.layers import Input, Dense, Activation, Flatten, Dropout
 from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
+from keras.utils import multi_gpu_model
 from glob import glob
 import os
 import time
 
 import clone
+import multiGPUCheckPointCallback
 
 # ラベルリスト
 LT = clone.LT
@@ -94,25 +96,29 @@ if __name__ == "__main__":
     model = Model(input_layer, output)
 
     opt = keras.optimizers.adam()
-    model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=['accuracy'])
+    model.compile(loss="categorical_crossentropy", optimizer=opt)
+
+    mg_model = multi_gpu_model(model, gpus=4)
+    mg_model.compile(loss="categorical_crossentropy", optimizer=opt)
     
     #es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=5, mode='auto')
     tb_cb = TensorBoard(log_dir='logs', histogram_freq=0)
-    mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True, save_weights_only=True)
+    #mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True, save_weights_only=True)
+    mc_cb = multiGPUCheckPointCallback.MultiGPUCheckpointCallback('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5',base_model=model, save_weights_only=True)
 
     callback = [tb_cb, mc_cb]
 
-    batch_size = 50
+    batch_size = 32 * 4
     epochs = 200
     
     start_Time = time.time()
     
-    model.fit(x=X_train,
-            y=Y_train,
-            batch_size=batch_size,
-            epochs=epochs,
-            callbacks=callback,
-            validation_split=0.1)
+    mg_model.fit(x=X_train,
+                y=Y_train,
+                batch_size=batch_size,
+                epochs=epochs,
+                callbacks=callback,
+                validation_split=0.1)
 
     end_Time = time.time() - start_Time
     s = 'batch_size:{0} epoch:{1} time:{2}[sec]\n'.format(batch_size, epochs, end_Time)
