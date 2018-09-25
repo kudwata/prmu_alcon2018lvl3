@@ -35,7 +35,7 @@ if __name__ == "__main__":
         labels = target.predict_once([img_num, 0])
         for i in range(LT.N_LABELS()):
             likelihood = labels[i]
-            if likelihood >= 0.9:
+            if likelihood >= 0.95:
                 l_name = LT.ID2LNAME(i)
                 print("{0}:{1}".format(l_name, likelihood))
         img = img_set.get_image(img_num)

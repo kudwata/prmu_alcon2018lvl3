@@ -19,7 +19,7 @@ TRAIN_IMAGE_DIR = clone.TRAIN_IMAGE_DIR
 # 訓練用画像の総数
 TRAIN_IMAGE_NUM = 418522
 # 学習に使う画像の数
-N_TRAIN = 10000
+N_TRAIN = 100000
 # テストデータの割合
 VAL_R = 0.1
 
