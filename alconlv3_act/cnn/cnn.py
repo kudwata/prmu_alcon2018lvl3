@@ -98,7 +98,7 @@ if __name__ == "__main__":
     
     #es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=5, mode='auto')
     tb_cb = TensorBoard(log_dir='logs', histogram_freq=0)
-    mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True)
+    mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True, save_weights_only=True)
 
     callback = [tb_cb, mc_cb]
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     epochs = 200
     
     start_Time = time.time()
-
+    
     model.fit(x=X_train,
             y=Y_train,
             batch_size=batch_size,

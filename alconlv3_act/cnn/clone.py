@@ -7,7 +7,6 @@ import skimage
 from PIL import Image
 from skimage.feature import local_binary_pattern
 from sklearn import neighbors
-from keras.models import load_model
 from sklearn.cluster import KMeans
 from labels import LabelTable
 from evaluation import LV3_Evaluator
