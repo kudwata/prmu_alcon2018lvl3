@@ -21,7 +21,7 @@ TRAIN_IMAGE_DIR = clone.TRAIN_IMAGE_DIR
 # 訓練用画像の総数
 TRAIN_IMAGE_NUM = 418522
 # 学習に使う画像の数
-N_TRAIN = 10000
+N_TRAIN = 100000
 # テストデータの割合
 VAL_R = 0.1
 
@@ -58,31 +58,33 @@ if __name__ == "__main__":
 
     likelihoods = target.predict_proba(features)
 
-    # ラベル数を絞って学習の高速化と原因究明（一時的に）
-    #n_labels = LT.N_LABELS()
-    n_labels = 50
+    n_labels = LT.N_LABELS()
+    #n_labels = 10
 
     Y_train = []
     for i in range(n_labels):
         y_train = []
         for j in range(N_TRAIN):
-            y_train.append([likelihoods[j][i], 1 - likelihoods[j][i]])
+            d = 0
+            if likelihoods[j][i] >= 0.5:
+                d = 1
+            y_train.append([d, 1 - d])
         Y_train.append(np.array(y_train, dtype='float32'))
     
     input_layer = Input(shape = (X_train.shape[1:]))
     x = Conv2D(UNIT_NUM, (3, 3), padding='same')(input_layer)
-    x = BatchNormalization()(x)
+#    x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = Conv2D(UNIT_NUM, (3, 3), padding='same')(x)
-    x = BatchNormalization()(x)
+#    x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D()(x)
     x = Dropout(0.25)(x)
     x = Conv2D(UNIT_NUM, (3, 3), padding='same')(x)
-    x = BatchNormalization()(x)
+#    x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = Conv2D(UNIT_NUM, (3, 3), padding='same')(x)
-    x = BatchNormalization()(x)
+#    x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D()(x)
     x = Dropout(0.25)(x)
