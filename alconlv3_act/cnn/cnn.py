@@ -21,12 +21,12 @@ TRAIN_IMAGE_DIR = clone.TRAIN_IMAGE_DIR
 # 訓練用画像の総数
 TRAIN_IMAGE_NUM = 418522
 # 学習に使う画像の数
-N_TRAIN = 100000
+N_TRAIN = 10000
 # テストデータの割合
 VAL_R = 0.1
 
 # 中間層のユニット数
-UNIT_NUM = 128
+UNIT_NUM = 64
 
 def getNewestModel(model, dirname):
     target = os.path.join(dirname, '*')
@@ -58,8 +58,12 @@ if __name__ == "__main__":
 
     likelihoods = target.predict_proba(features)
 
+    # ラベル数を絞って学習の高速化と原因究明（一時的に）
+    #n_labels = LT.N_LABELS()
+    n_labels = 50
+
     Y_train = []
-    for i in range(LT.N_LABELS()):
+    for i in range(n_labels):
         y_train = []
         for j in range(N_TRAIN):
             y_train.append([likelihoods[j][i], 1 - likelihoods[j][i]])
@@ -84,11 +88,10 @@ if __name__ == "__main__":
     x = Dropout(0.25)(x)
     
     x = Flatten()(x)
-    feature = Dense(512, activation='relu')(x)
-    feature = Dropout(0.25)(feature)
+    feature = Dense(128, activation='relu')(x)
 
     output = []
-    for i in range(LT.N_LABELS()):
+    for i in range(n_labels):
         output_layer = Dense(64, activation='relu')(feature)
         output_layer = Dense(2, activation='softmax', name=LT.ID2LNAME(i))(output_layer)
         output.append(output_layer)
@@ -98,22 +101,22 @@ if __name__ == "__main__":
     opt = keras.optimizers.adam()
     model.compile(loss="categorical_crossentropy", optimizer=opt)
 
-    mg_model = multi_gpu_model(model, gpus=4)
-    mg_model.compile(loss="categorical_crossentropy", optimizer=opt)
+    #mg_model = multi_gpu_model(model, gpus=4)
+    #mg_model.compile(loss="categorical_crossentropy", optimizer=opt)
     
     #es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=5, mode='auto')
     tb_cb = TensorBoard(log_dir='logs', histogram_freq=0)
-    #mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True, save_weights_only=True)
-    mc_cb = multiGPUCheckPointCallback.MultiGPUCheckpointCallback('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5',base_model=model, save_weights_only=True)
+    mc_cb = ModelCheckpoint('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True, save_weights_only=True)
+    #mc_cb = multiGPUCheckPointCallback.MultiGPUCheckpointCallback('weight/weights.{epoch:02d}-{val_loss:.2f}.hdf5',base_model=model, save_weights_only=True)
 
     callback = [tb_cb, mc_cb]
 
-    batch_size = 32 * 4
+    batch_size = 32
     epochs = 200
     
     start_Time = time.time()
     
-    mg_model.fit(x=X_train,
+    model.fit(x=X_train,
                 y=Y_train,
                 batch_size=batch_size,
                 epochs=epochs,
