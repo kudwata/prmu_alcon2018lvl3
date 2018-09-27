@@ -26,6 +26,7 @@ if __name__ == "__main__":
     
     target = clone.LV3_TargetClassifier()
     target.load(target_dir + "train.csv")
+    model = clone.CNN_Classifier(img_set)
 
     while(True):
         s = input("img_num:")

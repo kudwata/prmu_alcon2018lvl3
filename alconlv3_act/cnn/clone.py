@@ -11,6 +11,8 @@ from sklearn.cluster import KMeans
 from labels import LabelTable
 from evaluation import LV3_Evaluator
 
+import keras
+from keras.models import load_model
 # pylint: disable=W0612
 # pylint: disable=E1136
 
@@ -34,6 +36,9 @@ LT = LabelTable(LABEL_LIST)
 
 #最初に読み込む画像数
 IMG_NUM = 20000
+
+# 学習済みモデルのパス
+CLONED_MODEL = "cnn_b_model.h5"
 
 # 画像特徴抽出器に相当するクラス
 # このサンプルコードでは Local Binary Patterns を抽出することにする（skimageを使用）
@@ -216,6 +221,24 @@ def LV3_user_function_sampling(set, extractor, n_samples=64):
 
     return predicted
 
+class CNN_Classifier:
+    def __init__(self, img_set):
+        self.model = load_model(CLONED_MODEL)
+        self.img_set = img_set
+
+    def predict_proba(self, feature):
+        labels = []
+        for i in range(len(feature)):
+            img = self.img_set.get_image(feature[i][0])
+            img = img.astype("float32")
+            img /= 255.0
+            predicted = self.model.predict(np.array([img]))
+            """x = np.zeros(LT.N_LABELS())
+            for i in range(LT.N_LABELS()):
+                temp = predicted[i]
+                x[i] = temp[0][0]"""
+            labels.append(predicted[0])
+        return np.array(labels)
 
 # クローン処理の実行
 # 第一引数でターゲット認識器を表す画像ファイルが格納されているディレクトリを指定するものとする
@@ -242,7 +265,7 @@ if __name__ == '__main__':
 
     # ターゲット認識器への入力として用いる特徴量を用意
     # このサンプルコードではひとまず2,000サンプルを用意することにする
-    n = 5000
+    """n = 5000
     features = LV3_user_function_sampling(train_set,  extractor, n_samples=n)
     print("\n{0} features were sampled.".format(n))
 
@@ -253,13 +276,17 @@ if __name__ == '__main__':
     # クローン認識器を学習
     model = LV3_UserDefinedClassifier()
     model.fit(features, likelihoods)
-    print("\nA clone recognizer was trained.")
+    print("\nA clone recognizer was trained.")"""
 
     # 学習したクローン認識器の精度を評価
     valid_set = LV3_ImageSet(VALID_IMAGE_DIR) # 評価用画像データセットをロード
+    model = CNN_Classifier(valid_set)
     evaluator = LV3_Evaluator(valid_set, extractor)
     target.load(target_dir + "valid.csv")
     recall, precision, f_score = evaluator.calc_accuracy(target, model)
-    print("\nrecall: {0}".format(recall))
-    print("precision: {0}".format(precision))
-    print("F-score: {0}".format(f_score))
+    d = 'model: {0}\n'.format(CLONED_MODEL)
+    s = 'recall: {0}, precision: {1}, F-score: {2}\n'.format(recall, precision, f_score)
+    print(s)
+    with open('score.txt', mode='a') as f:
+        f.write(d)
+        f.write(s)
