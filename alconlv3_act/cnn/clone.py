@@ -13,6 +13,16 @@ from evaluation import LV3_Evaluator
 
 import keras
 from keras.models import load_model
+import keras.backend as K
+
+def weighted_square(y_true, y_pred):
+    WEIGHT = 1.5
+    x = K.maximum(y_true - y_pred, 0) * (y_true - y_pred)
+    y = K.maximum(y_pred - y_true, 0) * (y_pred - y_true)
+    x = K.pow(x, 2)
+    y = K.pow(y, 2)
+    return K.mean((x * WEIGHT) + y)
+weight = 0.7
 # pylint: disable=W0612
 # pylint: disable=E1136
 
@@ -38,7 +48,7 @@ LT = LabelTable(LABEL_LIST)
 IMG_NUM = 20000
 
 # 学習済みモデルのパス
-CLONED_MODEL = "cnn_b_model.h5"
+CLONED_MODEL = "cnn_model.h5"
 
 # 画像特徴抽出器に相当するクラス
 # このサンプルコードでは Local Binary Patterns を抽出することにする（skimageを使用）
@@ -223,26 +233,27 @@ def LV3_user_function_sampling(set, extractor, n_samples=64):
 
 class CNN_Classifier:
     def __init__(self, img_set):
-        self.model = load_model(CLONED_MODEL)
+        self.model = load_model(CLONED_MODEL, custom_objects={'weighted_square': weighted_square})
         self.img_set = img_set
 
-    def predict_proba(self, feature):
+    def predict_once(self, feature):
+        img = self.img_set.get_image(feature[0])
+        img = img.astype("float32")
+        img /= 255.0
+        predicted = self.model.predict(np.array([img]))[0]
+        predicted = (predicted + weight) / (1 + weight)
+        return predicted
+
+    def predict_proba(self, features):
         labels = []
-        for i in range(len(feature)):
-            img = self.img_set.get_image(feature[i][0])
-            img = img.astype("float32")
-            img /= 255.0
-            predicted = self.model.predict(np.array([img]))
-            """x = np.zeros(LT.N_LABELS())
-            for i in range(LT.N_LABELS()):
-                temp = predicted[i]
-                x[i] = temp[0][0]"""
-            labels.append(predicted[0])
+        for i in range(len(features)):
+            predicted = self.predict_once(features[i])
+            labels.append(predicted)
         return np.array(labels)
 
 # クローン処理の実行
 # 第一引数でターゲット認識器を表す画像ファイルが格納されているディレクトリを指定するものとする
-if __name__ == '__main__':
+def clone():
 
     if len(sys.argv) < 2:
         print("usage: clone.py /target/classifier/path")
@@ -284,9 +295,14 @@ if __name__ == '__main__':
     evaluator = LV3_Evaluator(valid_set, extractor)
     target.load(target_dir + "valid.csv")
     recall, precision, f_score = evaluator.calc_accuracy(target, model)
-    d = 'model: {0}\n'.format(CLONED_MODEL)
+    d = 'model: {0} : {1}\n'.format(CLONED_MODEL, weight)
     s = 'recall: {0}, precision: {1}, F-score: {2}\n'.format(recall, precision, f_score)
     print(s)
     with open('score.txt', mode='a') as f:
         f.write(d)
         f.write(s)
+
+if __name__ == "__main__":
+    for i in range(10):
+        weight = i * 0.1
+        clone()

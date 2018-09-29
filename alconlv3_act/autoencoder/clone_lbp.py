@@ -5,9 +5,8 @@ import csv
 import numpy as np
 import skimage
 from PIL import Image
-from skimage.feature import local_binary_pattern
+from skimage.feature import local_binary_pattern, hog
 from sklearn import neighbors
-from keras.models import load_model
 from sklearn.cluster import KMeans
 from labels import LabelTable
 from evaluation import LV3_Evaluator
@@ -39,13 +38,11 @@ IMG_NUM = 20000
 # 画像特徴抽出器に相当するクラス
 # このサンプルコードでは Local Binary Patterns を抽出することにする（skimageを使用）
 class LV3_FeatureExtractor:
-    def __init__(self, model_dir='ae_encoder.h5'):
-        self.encoder = load_model(model_dir)
-
     # 画像 img から抽出量を抽出する
     def extract(self, img):
         lbp = local_binary_pattern(img, 8, 1, method="uniform")
-        f, bins = np.histogram(lbp, bins=256, range=(0, 255), density=True)
+        #lbp = hog(img, block_norm="L2-Hys")
+        f, bins = np.histogram(lbp, bins=256, density=True)
         return np.asarray(f, dtype=np.float32)
 
     def extract_proba(self, imgs):

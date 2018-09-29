@@ -23,8 +23,6 @@ class LV3_Evaluator:
         self.clone_likelihoods = model.predict_proba(self.samples)
         a = self.target_likelihoods >= 0.5
         b = self.clone_likelihoods >= 0.5
-        print(a.shape)
-        print(b.shape)
         c = np.logical_and(a, b)
         r_avg = 0
         p_avg = 0
@@ -33,6 +31,8 @@ class LV3_Evaluator:
             an = np.sum(a[j])
             bn = np.sum(b[j])
             cn = np.sum(c[j])
+            r = 0
+            p = 0
             if an != 0:
                 r = cn / an
                 r_avg += r

@@ -3,7 +3,7 @@ import sys
 import keras
 from keras.models import Model
 from keras.layers import Input, Dense, Activation, Flatten, Dropout
-from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D
 from keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 from keras.utils import multi_gpu_model
 from glob import glob
@@ -73,18 +73,16 @@ if __name__ == "__main__":
     
     input_layer = Input(shape = (X_train.shape[1:]))
     x = Conv2D(UNIT_NUM, (3, 3), padding='same')(input_layer)
-#    x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = Conv2D(UNIT_NUM, (3, 3), padding='same')(x)
-#    x = BatchNormalization()(x)
     x = Activation('relu')(x)
     x = MaxPooling2D()(x)
     x = Dropout(0.25)(x)
-    x = Conv2D(UNIT_NUM, (3, 3), padding='same')(x)
-#    x = BatchNormalization()(x)
+    x = Conv2D(UNIT_NUM * 2, (3, 3), padding='same')(x)
     x = Activation('relu')(x)
-    x = Conv2D(UNIT_NUM, (3, 3), padding='same')(x)
-#    x = BatchNormalization()(x)
+    x = Conv2D(UNIT_NUM * 2, (3, 3), padding='same')(x)
+    x = Activation('relu')(x)
+    x = Conv2D(UNIT_NUM * 2, (3, 3), padding='same')(x)
     x = Activation('relu')(x)
     x = MaxPooling2D()(x)
     x = Dropout(0.25)(x)
