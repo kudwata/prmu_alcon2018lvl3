@@ -1,2 +1,6 @@
 batch_size:32 epoch:20 time:167.10466885566711[sec]
 batch_size:32 epoch:20 time:167.2152864933014[sec]
+batch_size:32 epoch:20 time:748.7078049182892[sec]
+batch_size:32 epoch:20 time:755.9400899410248[sec]
+batch_size:32 epoch:20 time:1482.2357523441315[sec]
+batch_size:32 epoch:20 time:1656.0444250106812[sec]

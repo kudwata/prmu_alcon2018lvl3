@@ -22,7 +22,7 @@ TRAIN_IMAGE_DIR = clone.TRAIN_IMAGE_DIR
 # 訓練用画像の総数
 TRAIN_IMAGE_NUM = 418522
 # 学習に使う画像の数
-N_TRAIN = 50000
+N_TRAIN = 100000
 # テストデータの割合
 VAL_R = 0.1
 
@@ -39,8 +39,8 @@ def getNewestModel(model, dirname):
     if len(files) == 0:
         return model
     else:
-        newestModel = sorted(files, key=lambda files: files[1])[-1]
-        model.load_weights(newestModel[0])
+        newest_model = sorted(files, key=lambda files: files[1])[-1]
+        model.load_weights(newest_model[0])
         return model
 
 # 重み付き二乗誤差平均
@@ -113,10 +113,9 @@ if __name__ == "__main__":
     model = Model(input_layer, output)
 
     opt = keras.optimizers.adam()
-    model.compile(loss=weighted_square, optimizer=opt)
-    #model.compile(loss="binary_crossentropy", optimizer=opt)
+    model.compile(loss="binary_crossentropy", optimizer=opt)
     
-    #es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=5, mode='auto')
+    es_cb = EarlyStopping(monitor='val_loss',min_delta=0, patience=3, mode='auto')
     tb_cb = TensorBoard(log_dir='logs', histogram_freq=0)
     
     batch_size = 32
